@@ -1,7 +1,25 @@
+/**
+ * @file ADC_Program.c
+ * @brief ADC Program driver implementation.
+ * @details Contains the implementation of the module APIs and internal helper functions.
+ * @version 1.0.0
+ * @author Yousef
+ * @date 2026-09-12
+ * @copyright Copyright (c) 2026, Embedded Systems Project
+ */
+
 #include "ADC_Interface.h"
 
 static void (*ADC_CallBack)(uint16_t) = Null;
 
+/**
+ * @fn ADC_Init
+ * @brief Initializes the ADC peripheral.
+ * @details Performs the operation required by the module while preserving the module interface.
+ * @param Configuration Module configuration structure.
+ * @return void
+ * @note Ensure module initialization is completed before calling dependent APIs.
+ */
 void ADC_Init(Adc_Config_t Configuration)
 {
     /* Select Voltage Reference */
@@ -55,12 +73,23 @@ void ADC_Init(Adc_Config_t Configuration)
 
     /* Select Prescaler */
     ADCSRA_Reg = (ADCSRA_Reg & ~Adc_PrescalerMask) | Configuration.PrescallerSelection;
-    
+
     /* Enable ADC */
     SetBit(ADCSRA_Reg, Adc_ADEN);
 }
 
 
+/**
+ * @fn ADC_ReadChannelPolling
+ * @brief Reads an ADC channel using polling.
+ * @details Performs the operation required by the module while preserving the module interface.
+ * @param Channel Input parameter.
+ * @param Timeout Input parameter.
+ * @return uint16_t Return value of the operation.
+ * @retval 0 Operation completed successfully when a status code is used.
+ * @retval Non-zero Module-specific error or status code when applicable.
+ * @note Ensure module initialization is completed before calling dependent APIs.
+ */
 uint16_t ADC_ReadChannelPolling(uint8_t Channel, uint32_t Timeout)
 {
     uint16_t Local_AdcData;
@@ -107,6 +136,14 @@ uint16_t ADC_ReadChannelPolling(uint8_t Channel, uint32_t Timeout)
 }
 
 
+/**
+ * @fn ADC_StartConversionInterrupt
+ * @brief Starts an ADC conversion using interrupt mode.
+ * @details Performs the operation required by the module while preserving the module interface.
+ * @param Channel Input parameter.
+ * @return void
+ * @note Ensure module initialization is completed before calling dependent APIs.
+ */
 void ADC_StartConversionInterrupt(uint8_t Channel)
 {
     /* Select Channel */
@@ -117,6 +154,14 @@ void ADC_StartConversionInterrupt(uint8_t Channel)
 }
 
 
+/**
+ * @fn ADC_SetCallBack
+ * @brief Registers the ADC interrupt callback function.
+ * @details Performs the operation required by the module while preserving the module interface.
+ * @param CopyFunc Callback function invoked by the module.
+ * @return void
+ * @note Ensure module initialization is completed before calling dependent APIs.
+ */
 void ADC_SetCallBack(void (*Copy_pvCallBack)(uint16_t))
 {
     if(Copy_pvCallBack != Null)
@@ -127,7 +172,22 @@ void ADC_SetCallBack(void (*Copy_pvCallBack)(uint16_t))
 
 /* ADC Conversion Complete ISR */
 /* NOTE: On ATmega32 the ADC vector is __vector_16, but on ATmega16 it is __vector_14. */
+/**
+ * @fn __vector_14
+ * @brief Handles the interrupt service routine for __vector_14.
+ * @details Performs the operation required by the module while preserving the module interface.
+ * @param CopyFunc Callback function invoked by the module.
+ * @return void
+ * @note Ensure module initialization is completed before calling dependent APIs.
+ */
 void __vector_14(void) __attribute__((signal));
+/**
+ * @fn __vector_14
+ * @brief Handles the interrupt service routine for __vector_14.
+ * @details Performs the operation required by the module while preserving the module interface.
+ * @return void
+ * @note Ensure module initialization is completed before calling dependent APIs.
+ */
 void __vector_14(void)
 {
     uint16_t Local_AdcData;

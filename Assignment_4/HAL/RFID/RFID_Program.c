@@ -1,18 +1,57 @@
+/**
+ * @file RFID_Program.c
+ * @brief RFID Program driver implementation.
+ * @details Contains the implementation of the module APIs and internal helper functions.
+ * @version 1.0.0
+ * @author Yousef
+ * @date 2026-09-12
+ * @copyright Copyright (c) 2026, Embedded Systems Project
+ */
+
 #include "RFID_Interface.h"
 
 
 // Low level SPI access
- 
+
+/**
+ * @fn RFID_CS_Select
+ * @brief Executes the rfid cs select operation.
+ * @details Performs the operation required by the module while preserving the module interface.
+ * @return void Return value of the operation.
+ * @retval 0 Operation completed successfully when a status code is used.
+ * @retval Non-zero Module-specific error or status code when applicable.
+ * @note Ensure module initialization is completed before calling dependent APIs.
+ */
 static void RFID_CS_Select(void)
 {
     DIO_WritePin(RFID_CS_GROUP, RFID_CS_PIN, Low);
 }
 
+/**
+ * @fn RFID_CS_Release
+ * @brief Executes the rfid cs release operation.
+ * @details Performs the operation required by the module while preserving the module interface.
+ * @return void Return value of the operation.
+ * @retval 0 Operation completed successfully when a status code is used.
+ * @retval Non-zero Module-specific error or status code when applicable.
+ * @note Ensure module initialization is completed before calling dependent APIs.
+ */
 static void RFID_CS_Release(void)
 {
     DIO_WritePin(RFID_CS_GROUP, RFID_CS_PIN, High);
 }
 
+/**
+ * @fn RFID_WriteRegister
+ * @brief Writes a value to an MFRC522 register.
+ * @details Performs the operation required by the module while preserving the module interface.
+ * @param Reg Register address or register identifier.
+ * @param Value Value to be written or configured.
+ * @return void Return value of the operation.
+ * @retval 0 Operation completed successfully when a status code is used.
+ * @retval Non-zero Module-specific error or status code when applicable.
+ * @note Ensure module initialization is completed before calling dependent APIs.
+ */
 static void RFID_WriteRegister(uint8_t Reg, uint8_t Value)
 {
     RFID_CS_Select();
@@ -21,6 +60,16 @@ static void RFID_WriteRegister(uint8_t Reg, uint8_t Value)
     RFID_CS_Release();
 }
 
+/**
+ * @fn RFID_ReadRegister
+ * @brief Reads a value from an MFRC522 register.
+ * @details Performs the operation required by the module while preserving the module interface.
+ * @param Reg Register address or register identifier.
+ * @return uint8_t Return value of the operation.
+ * @retval 0 Operation completed successfully when a status code is used.
+ * @retval Non-zero Module-specific error or status code when applicable.
+ * @note Ensure module initialization is completed before calling dependent APIs.
+ */
 static uint8_t RFID_ReadRegister(uint8_t Reg)
 {
     uint8_t Value;
@@ -33,18 +82,49 @@ static uint8_t RFID_ReadRegister(uint8_t Reg)
     return Value;
 }
 
+/**
+ * @fn RFID_SetBitMask
+ * @brief Sets selected bits in an MFRC522 register.
+ * @details Performs the operation required by the module while preserving the module interface.
+ * @param Reg Register address or register identifier.
+ * @param Mask Input parameter.
+ * @return void Return value of the operation.
+ * @retval 0 Operation completed successfully when a status code is used.
+ * @retval Non-zero Module-specific error or status code when applicable.
+ * @note Ensure module initialization is completed before calling dependent APIs.
+ */
 static void RFID_SetBitMask(uint8_t Reg, uint8_t Mask)
 {
     uint8_t Temp = RFID_ReadRegister(Reg);
     RFID_WriteRegister(Reg, Temp | Mask);
 }
 
+/**
+ * @fn RFID_ClearBitMask
+ * @brief Clears selected bits in an MFRC522 register.
+ * @details Performs the operation required by the module while preserving the module interface.
+ * @param Reg Register address or register identifier.
+ * @param Mask Input parameter.
+ * @return void Return value of the operation.
+ * @retval 0 Operation completed successfully when a status code is used.
+ * @retval Non-zero Module-specific error or status code when applicable.
+ * @note Ensure module initialization is completed before calling dependent APIs.
+ */
 static void RFID_ClearBitMask(uint8_t Reg, uint8_t Mask)
 {
     uint8_t Temp = RFID_ReadRegister(Reg);
     RFID_WriteRegister(Reg, Temp & (~Mask));
 }
 
+/**
+ * @fn RFID_AntennaOn
+ * @brief Enables the MFRC522 RF antenna.
+ * @details Performs the operation required by the module while preserving the module interface.
+ * @return void Return value of the operation.
+ * @retval 0 Operation completed successfully when a status code is used.
+ * @retval Non-zero Module-specific error or status code when applicable.
+ * @note Ensure module initialization is completed before calling dependent APIs.
+ */
 static void RFID_AntennaOn(void)
 {
     uint8_t Temp = RFID_ReadRegister(RFID_REG_TX_CONTROL);
@@ -58,6 +138,20 @@ static void RFID_AntennaOn(void)
 //  Card communication (anti-collision protocol)
 
 
+/**
+ * @fn RFID_ToCard
+ * @brief Exchanges a command and data frame with an RFID card.
+ * @details Performs the operation required by the module while preserving the module interface.
+ * @param Command Input parameter.
+ * @param SendData Data value or data buffer used by the operation.
+ * @param SendLen Length of the data in bytes or bits, as applicable.
+ * @param BackData Data value or data buffer used by the operation.
+ * @param BackLenBits Length of the data in bytes or bits, as applicable.
+ * @return uint8_t Return value of the operation.
+ * @retval 0 Operation completed successfully when a status code is used.
+ * @retval Non-zero Module-specific error or status code when applicable.
+ * @note Ensure module initialization is completed before calling dependent APIs.
+ */
 static uint8_t RFID_ToCard(uint8_t Command, uint8_t *SendData, uint8_t SendLen,
                             uint8_t *BackData, uint16_t *BackLenBits)
 {
@@ -142,6 +236,17 @@ static uint8_t RFID_ToCard(uint8_t Command, uint8_t *SendData, uint8_t SendLen,
     return Status;
 }
 
+/**
+ * @fn RFID_Request
+ * @brief Requests an RFID card in the field.
+ * @details Performs the operation required by the module while preserving the module interface.
+ * @param ReqMode Operating mode selection.
+ * @param TagType Input parameter.
+ * @return uint8_t Return value of the operation.
+ * @retval 0 Operation completed successfully when a status code is used.
+ * @retval Non-zero Module-specific error or status code when applicable.
+ * @note Ensure module initialization is completed before calling dependent APIs.
+ */
 static uint8_t RFID_Request(uint8_t ReqMode, uint8_t *TagType)
 {
     uint8_t  Status;
@@ -160,6 +265,16 @@ static uint8_t RFID_Request(uint8_t ReqMode, uint8_t *TagType)
     return Status;
 }
 
+/**
+ * @fn RFID_Anticoll
+ * @brief Performs RFID anti-collision and reads the card UID.
+ * @details Performs the operation required by the module while preserving the module interface.
+ * @param SerNum Input parameter.
+ * @return uint8_t Return value of the operation.
+ * @retval 0 Operation completed successfully when a status code is used.
+ * @retval Non-zero Module-specific error or status code when applicable.
+ * @note Ensure module initialization is completed before calling dependent APIs.
+ */
 static uint8_t RFID_Anticoll(uint8_t *SerNum)
 {
     uint8_t  Status;
@@ -191,6 +306,18 @@ static uint8_t RFID_Anticoll(uint8_t *SerNum)
     return Status;
 }
 
+/**
+ * @fn RFID_CalculateCRC
+ * @brief Requests CRC calculation from the MFRC522.
+ * @details Performs the operation required by the module while preserving the module interface.
+ * @param Data Data value or data buffer used by the operation.
+ * @param Len Length of the data in bytes or bits, as applicable.
+ * @param Result Input parameter.
+ * @return void Return value of the operation.
+ * @retval 0 Operation completed successfully when a status code is used.
+ * @retval Non-zero Module-specific error or status code when applicable.
+ * @note Ensure module initialization is completed before calling dependent APIs.
+ */
 static void RFID_CalculateCRC(uint8_t *Data, uint8_t Len, uint8_t *Result)
 {
     uint8_t  N;
@@ -218,8 +345,15 @@ static void RFID_CalculateCRC(uint8_t *Data, uint8_t Len, uint8_t *Result)
 }
 
 // Public API
- 
 
+
+/**
+ * @fn RFID_Init
+ * @brief Initializes the MFRC522 RFID reader.
+ * @details Performs the operation required by the module while preserving the module interface.
+ * @return void
+ * @note Ensure module initialization is completed before calling dependent APIs.
+ */
 void RFID_Init(void)
 {
     DIO_InitPin(RFID_RST_GROUP, RFID_RST_PIN, Output);
@@ -242,6 +376,16 @@ void RFID_Init(void)
     RFID_AntennaOn();
 }
 
+/**
+ * @fn RFID_CheckCard
+ * @brief Checks for an RFID card and retrieves its UID.
+ * @details Requests a card and performs anti-collision when a card is detected.
+ * @param CardID Input parameter.
+ * @return uint8_t Return value of the operation.
+ * @retval 0 Operation completed successfully when a status code is used.
+ * @retval Non-zero Module-specific error or status code when applicable.
+ * @note Ensure module initialization is completed before calling dependent APIs.
+ */
 uint8_t RFID_CheckCard(uint8_t *CardID)
 {
     uint8_t Status;
@@ -258,6 +402,13 @@ uint8_t RFID_CheckCard(uint8_t *CardID)
     return Status;
 }
 
+/**
+ * @fn RFID_Halt
+ * @brief Requests the selected RFID card to enter the HALT state.
+ * @details Builds the HALT command, calculates its CRC, and transmits it to the card.
+ * @return void
+ * @note Ensure module initialization is completed before calling dependent APIs.
+ */
 void RFID_Halt(void)
 {
     uint8_t  Buffer[4];
